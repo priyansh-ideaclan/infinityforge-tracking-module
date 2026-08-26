@@ -1,0 +1,50 @@
+{
+  "description": "Illustrates the anonymous -> authenticated -> reset -> authenticated (different account) lifecycle described in specification/identity.md. Each entry is one conceptual operation call, in order, followed by the resulting identity state.",
+  "sequence": [
+    {
+      "step": 1,
+      "operation": "initialize",
+      "inputs": { "app_id": "example-app", "environment": "production" },
+      "resulting_identity": { "anonymous_id": "ANON_100", "user_id": null }
+    },
+    {
+      "step": 2,
+      "operation": "track",
+      "inputs": { "event": "app_opened", "properties": { "launch_type": "cold" } },
+      "resulting_identity": { "anonymous_id": "ANON_100", "user_id": null }
+    },
+    {
+      "step": 3,
+      "operation": "track",
+      "inputs": { "event": "signup_completed", "properties": { "method": "email" } },
+      "resulting_identity": { "anonymous_id": "ANON_100", "user_id": null }
+    },
+    {
+      "step": 4,
+      "operation": "identify",
+      "inputs": { "user_id": "USER_A" },
+      "resulting_identity": { "anonymous_id": "ANON_100", "user_id": "USER_A" },
+      "note": "identify() is called immediately after signup_completed, per specification/identity.md. anonymous_id is retained alongside user_id."
+    },
+    {
+      "step": 5,
+      "operation": "track",
+      "inputs": { "event": "feature_used", "properties": { "feature_name": "export_to_pdf" } },
+      "resulting_identity": { "anonymous_id": "ANON_100", "user_id": "USER_A" }
+    },
+    {
+      "step": 6,
+      "operation": "reset",
+      "inputs": {},
+      "resulting_identity": { "anonymous_id": "ANON_101", "user_id": null },
+      "note": "Logout. user_id and user-level properties are cleared; a new anonymous_id is issued rather than reusing ANON_100, per the privacy rationale in specification/identity.md."
+    },
+    {
+      "step": 7,
+      "operation": "identify",
+      "inputs": { "user_id": "USER_B" },
+      "resulting_identity": { "anonymous_id": "ANON_101", "user_id": "USER_B" },
+      "note": "A second, different account signs in on the same device. reset() was called before identify(), per the account-switching guidance in specification/identity.md."
+    }
+  ]
+}

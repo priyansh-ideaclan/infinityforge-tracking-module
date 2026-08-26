@@ -1,0 +1,61 @@
+# InfinityForge Tracking — Application Events
+#
+# See specification/events.md for how to read this file, and
+# schema/event-properties.yaml for the shape of each property entry.
+
+category: application
+
+events:
+  - name: app_opened
+    schema_version: 1
+    description: >
+      The application has become active and ready for user interaction.
+    trigger: >
+      Once per distinct occurrence of the application becoming active and
+      usable to the user — for example, a cold start, or the app returning
+      to the foreground after having been backgrounded.
+    purpose: >
+      Establishes how often and how the application is being opened, as a
+      baseline usage signal independent of any specific feature.
+    properties:
+      - name: launch_type
+        type: enum
+        required: false
+        common: true
+        allowed_values: [cold, warm]
+        description: >
+          Whether this occurrence was a full cold start or a resume from
+          the background, when the implementation can reliably distinguish
+          the two. Omitted when it cannot be determined.
+    example: examples/payloads/app_opened.json
+
+  - name: screen_viewed
+    schema_version: 1
+    description: >
+      The user is now viewing a given screen. See
+      specification/screen-tracking.md for the full semantic definition.
+    trigger: >
+      Whenever the user's active screen context changes to a new distinct
+      screen, per the duplicate-event policy in
+      specification/screen-tracking.md.
+    purpose: >
+      The foundational signal for understanding navigation and screen-level
+      engagement across the application.
+    properties:
+      - name: screen_name
+        type: string
+        required: true
+        common: true
+        description: >
+          A stable, logical identifier for the screen (for example, a route
+          or view identifier). Must never contain dynamic personal
+          information — see specification/screen-tracking.md and
+          specification/privacy.md.
+      - name: previous_screen
+        type: string
+        required: false
+        common: true
+        description: >
+          The screen_name of the screen the user was on immediately prior
+          to this one, when known.
+    example: examples/payloads/screen_viewed.json

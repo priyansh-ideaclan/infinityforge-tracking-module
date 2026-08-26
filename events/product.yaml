@@ -1,0 +1,30 @@
+# InfinityForge Tracking — Product Events
+#
+# See specification/events.md for how to read this file.
+
+category: product
+
+events:
+  - name: feature_used
+    schema_version: 1
+    description: The user has engaged with a specific, identifiable feature of the application.
+    trigger: >
+      When the user performs an action that constitutes meaningful use of a
+      feature the application wants to measure — the granularity of what
+      counts as "a feature" is an application decision, applied
+      consistently.
+    purpose: >
+      A general-purpose signal for feature-level engagement, used across
+      many different features rather than defining a new event per feature.
+    properties:
+      - name: feature_name
+        type: string
+        required: true
+        common: true
+        description: A stable, logical identifier for the feature that was used.
+      - name: feature_category
+        type: string
+        required: false
+        common: true
+        description: An application-defined grouping the feature belongs to, when useful for analysis.
+    example: examples/payloads/feature_used.json

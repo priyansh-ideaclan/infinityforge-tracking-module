@@ -1,0 +1,16 @@
+{
+  "event": "signup_completed",
+  "schema_version": 1,
+  "timestamp": "2026-01-01T09:02:30Z",
+  "app_id": "example-app",
+  "environment": "production",
+  "platform": "ios",
+  "sdk_name": "react-native",
+  "sdk_version": "1.0.0",
+  "app_version": "2.4.1",
+  "user_id": "USER_123",
+  "anonymous_id": "ANON_003",
+  "properties": {
+    "method": "email"
+  }
+}

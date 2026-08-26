@@ -1,0 +1,15 @@
+{
+  "event": "login_started",
+  "schema_version": 1,
+  "timestamp": "2026-02-01T08:00:00Z",
+  "app_id": "example-app",
+  "environment": "production",
+  "platform": "android",
+  "sdk_name": "kotlin",
+  "sdk_version": "1.0.0",
+  "app_version": "2.4.1",
+  "anonymous_id": "ANON_004",
+  "properties": {
+    "method": "social"
+  }
+}

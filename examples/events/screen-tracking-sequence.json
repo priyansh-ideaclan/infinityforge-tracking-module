@@ -1,0 +1,9 @@
+{
+  "description": "Illustrates the duplicate screen_viewed suppression rule described in specification/screen-tracking.md. Each entry is one navigation occurrence; 'emitted' indicates whether a screen_viewed event is recorded for it.",
+  "sequence": [
+    { "step": 1, "navigates_to": "home", "emitted": true, "note": "First view of this screen in the session." },
+    { "step": 2, "navigates_to": "home", "emitted": false, "note": "A re-render or repeated call for the same, still-current screen is suppressed." },
+    { "step": 3, "navigates_to": "settings", "emitted": true, "note": "The active screen context changed to a distinct screen." },
+    { "step": 4, "navigates_to": "home", "emitted": true, "note": "Returning to a previously-viewed screen is a new occurrence and is recorded again." }
+  ]
+}

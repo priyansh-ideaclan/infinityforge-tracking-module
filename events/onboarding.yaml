@@ -1,0 +1,27 @@
+# InfinityForge Tracking — Onboarding Events
+#
+# See specification/events.md for how to read this file.
+
+category: onboarding
+
+events:
+  - name: onboarding_started
+    schema_version: 1
+    description: The user has begun the application's onboarding experience.
+    trigger: When the onboarding flow is first presented to the user and begins.
+    purpose: Measures onboarding funnel entry, for comparison against onboarding_completed.
+    properties: []
+    example: examples/payloads/onboarding_started.json
+
+  - name: onboarding_completed
+    schema_version: 1
+    description: The user has finished the application's onboarding experience.
+    trigger: When the onboarding flow reaches its defined completion point.
+    purpose: Measures onboarding completion and, alongside onboarding_started, drop-off.
+    properties:
+      - name: step_count
+        type: integer
+        required: false
+        common: true
+        description: The number of discrete steps the user completed during onboarding, when the application tracks steps as a defined sequence.
+    example: examples/payloads/onboarding_completed.json

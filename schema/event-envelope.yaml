@@ -1,0 +1,92 @@
+# InfinityForge Tracking — Canonical Event Envelope
+#
+# Every event emitted by a conforming implementation matches this structure.
+# See specification/metadata.md for field ownership (who supplies each
+# field) and specification/contract.md for conformance requirements.
+
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "InfinityForge Tracking Event Envelope"
+description: >
+  The fixed structure every InfinityForge tracking event is wrapped in,
+  regardless of platform, adapter, or downstream analytics provider.
+type: object
+additionalProperties: false
+
+required:
+  - event
+  - schema_version
+  - timestamp
+  - app_id
+  - environment
+  - platform
+  - sdk_version
+  - app_version
+  - anonymous_id
+
+properties:
+  event:
+    $ref: "common-types.yaml#/$defs/identifier"
+    description: "The event name. Source — application."
+
+  schema_version:
+    $ref: "common-types.yaml#/$defs/schema_version"
+    description: >
+      The schema_version of the event definition being emitted (see
+      events/*.yaml). Source — SDK.
+
+  timestamp:
+    $ref: "common-types.yaml#/$defs/timestamp"
+    description: >
+      Captured automatically at the moment the operation was invoked.
+      Source — SDK.
+
+  app_id:
+    $ref: "common-types.yaml#/$defs/non_empty_string"
+    description: "Identifies the InfinityForge app/product this event came from. Source — application."
+
+  environment:
+    $ref: "common-types.yaml#/$defs/environment"
+    description: "See specification/metadata.md. Source — application."
+
+  platform:
+    $ref: "common-types.yaml#/$defs/platform"
+    description: "The runtime operating system the app executed on. Source — SDK."
+
+  sdk_version:
+    $ref: "common-types.yaml#/$defs/version_string"
+    description: "The version of the adapter implementing this contract. Source — SDK."
+
+  sdk_name:
+    type: string
+    minLength: 1
+    description: >
+      Identifies which conceptual adapter emitted the event (for example,
+      distinguishing a React Native adapter from a native Swift adapter on
+      the same platform). Optional — see specification/metadata.md for why
+      it exists. Source — SDK.
+
+  app_version:
+    $ref: "common-types.yaml#/$defs/version_string"
+    description: "The version/build identifier of the host application. Source — application (may be auto-read by the SDK from platform package metadata)."
+
+  user_id:
+    $ref: "common-types.yaml#/$defs/non_empty_string"
+    description: >
+      Present only once identify() has been called and not yet cleared by
+      reset(). Absent (not null) when there is no identified user.
+      Source — SDK, from identity state (specification/identity.md).
+
+  anonymous_id:
+    $ref: "common-types.yaml#/$defs/non_empty_string"
+    description: >
+      Always present. Established by initialize() and replaced on reset().
+      Source — SDK, from identity state.
+
+  properties:
+    type: object
+    description: >
+      Application-provided, event-specific data. Structure for each
+      canonical event is defined in the corresponding entry under
+      events/*.yaml. Absent or empty when an event has no properties.
+
+# Fields not listed in `required` above (user_id, sdk_name) are optional.

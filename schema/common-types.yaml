@@ -1,0 +1,82 @@
+# InfinityForge Tracking — Common Types
+#
+# Shared, reusable type definitions referenced by event-envelope.yaml and by
+# event property definitions in events/*.yaml (via schema/event-properties.yaml).
+#
+# Written as JSON Schema (draft 2020-12) $defs. File-relative $ref (e.g.
+# "common-types.yaml#/$defs/identifier") is the intended reference form for
+# tooling that resolves local file references. No code generation or CI
+# validation against this file is wired up yet — see validation/README.md
+# for what is actually enforced today.
+
+$schema: "https://json-schema.org/draft/2020-12/schema"
+$comment: >
+  Platform-independent primitive and identifier types shared across the
+  InfinityForge Tracking Contract. Do not add a type here unless at least
+  two other schema files reference it.
+
+$defs:
+  identifier:
+    type: string
+    pattern: "^[a-z][a-z0-9_]*[a-z0-9]$"
+    minLength: 2
+    description: >
+      A snake_case identifier used for event names and property keys. Must
+      start with a lowercase letter, contain only lowercase letters, digits,
+      and underscores, and must not start or end with an underscore.
+
+  non_empty_string:
+    type: string
+    minLength: 1
+    description: A string that must not be empty.
+
+  timestamp:
+    type: string
+    format: date-time
+    description: >
+      An ISO 8601 timestamp in UTC, including the "Z" designator (for
+      example, "2026-01-01T12:00:00Z"). See specification/conventions.md.
+
+  environment:
+    type: string
+    enum: [development, preview, production]
+    description: >
+      The build context an event was recorded from. See
+      specification/metadata.md for the semantic meaning of each value.
+      No value beyond these three is currently defined.
+
+  platform:
+    type: string
+    enum: [ios, android, web, other]
+    description: >
+      The runtime operating system or environment the app executed on —
+      not the framework or language used to build it. "other" is reserved
+      for platforms not yet enumerated here (for example, a future Unity
+      or embedded target); it should be narrowed to a named value before
+      it is used at scale.
+
+  currency_code:
+    type: string
+    pattern: "^[A-Z]{3}$"
+    description: An uppercase ISO 4217 three-letter currency code (for example, "USD", "INR").
+
+  schema_version:
+    type: integer
+    minimum: 1
+    description: >
+      The schema version of a specific event definition. See
+      specification/versioning.md.
+
+  version_string:
+    type: string
+    minLength: 1
+    description: >
+      An application or SDK version identifier (for example, a semantic
+      version like "2.4.1", or a platform-specific build identifier). The
+      format is intentionally permissive because versioning schemes differ
+      across platform toolchains; it must be a non-empty, stable string
+      suitable for compatibility comparison.
+
+  boolean_strict:
+    type: boolean
+    description: Only the literal values true/false are valid — never string or integer representations.

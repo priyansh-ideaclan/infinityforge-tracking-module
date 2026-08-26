@@ -1,0 +1,71 @@
+# InfinityForge Tracking — Authentication Events
+#
+# See specification/events.md for how to read this file. These events
+# describe the flows around establishing an authenticated identity — they
+# do not themselves call identify(); see specification/identity.md for how
+# identify() relates to a completed signup or login.
+
+category: authentication
+
+events:
+  - name: signup_started
+    schema_version: 1
+    description: The user has begun the account-creation flow.
+    trigger: When the user initiates account creation, before it completes.
+    purpose: Measures signup funnel entry, for comparison against signup_completed.
+    properties:
+      - name: method
+        type: enum
+        required: false
+        common: true
+        allowed_values: [email, phone, social, other]
+        description: The general category of signup method the user selected.
+    example: examples/payloads/signup_started.json
+
+  - name: signup_completed
+    schema_version: 1
+    description: The user has successfully created a new account.
+    trigger: >
+      When account creation succeeds and a new account now exists. The
+      application should call identify() with the new account's user_id at
+      or immediately after this point — see specification/identity.md.
+    purpose: Measures successful signup conversion.
+    properties:
+      - name: method
+        type: enum
+        required: false
+        common: true
+        allowed_values: [email, phone, social, other]
+        description: The general category of signup method used, matching signup_started when known.
+    example: examples/payloads/signup_completed.json
+
+  - name: login_started
+    schema_version: 1
+    description: The user has begun authenticating into an existing account.
+    trigger: When the user initiates login, before it completes.
+    purpose: Measures login funnel entry, for comparison against login_completed.
+    properties:
+      - name: method
+        type: enum
+        required: false
+        common: true
+        allowed_values: [email, phone, social, other]
+        description: The general category of login method the user selected.
+    example: examples/payloads/login_started.json
+
+  - name: login_completed
+    schema_version: 1
+    description: The user has successfully authenticated into an existing account.
+    trigger: >
+      When authentication succeeds. The application should call identify()
+      with the account's user_id at or immediately after this point — see
+      specification/identity.md.
+    purpose: Measures successful login conversion.
+    properties:
+      - name: method
+        type: enum
+        required: false
+        common: true
+        allowed_values: [email, phone, social, other]
+        description: The general category of login method used, matching login_started when known.
+    example: examples/payloads/login_completed.json

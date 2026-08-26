@@ -1,0 +1,114 @@
+# InfinityForge Tracking — Monetization Events
+#
+# See specification/events.md for how to read this file, and
+# specification/conventions.md for currency/number conventions (amounts in
+# major units, paired with an ISO 4217 currency code).
+
+category: monetization
+
+events:
+  - name: paywall_viewed
+    schema_version: 1
+    description: The user has been presented with a paywall or upgrade offer.
+    trigger: When a paywall surface is displayed to the user.
+    purpose: Measures monetization funnel entry and paywall exposure.
+    properties:
+      - name: placement
+        type: string
+        required: false
+        common: true
+        description: A stable identifier for where in the application this paywall was shown.
+      - name: source
+        type: string
+        required: false
+        common: true
+        description: A stable identifier for what triggered the paywall to be shown, when the application tracks that.
+    example: examples/payloads/paywall_viewed.json
+
+  - name: trial_started
+    schema_version: 1
+    description: The user has started a free or introductory trial.
+    trigger: When a trial period begins.
+    purpose: Measures trial conversion from paywall exposure, and trial volume.
+    properties:
+      - name: plan
+        type: string
+        required: false
+        common: true
+        description: A stable identifier for the plan the trial applies to.
+      - name: trial_length_days
+        type: integer
+        required: false
+        common: true
+        description: The length of the trial period in days.
+    example: examples/payloads/trial_started.json
+
+  - name: subscription_started
+    schema_version: 1
+    description: A paid subscription has started, whether directly or following a trial.
+    trigger: When a subscription becomes active.
+    purpose: The primary signal for recurring-revenue conversion.
+    properties:
+      - name: plan
+        type: string
+        required: true
+        common: true
+        description: A stable identifier for the subscription plan (required — the event is not meaningful without knowing which plan was started).
+      - name: price
+        type: number
+        required: false
+        common: true
+        description: The subscription price in the currency's major unit. Must be accompanied by `currency` when present — see specification/conventions.md.
+      - name: currency
+        type: string
+        required: false
+        common: true
+        description: The ISO 4217 currency code for `price`, when `price` is present.
+      - name: billing_cycle
+        type: enum
+        required: false
+        common: true
+        allowed_values: [monthly, yearly, weekly, other]
+        description: The billing interval for the subscription.
+    example: examples/payloads/subscription_started.json
+
+  - name: subscription_cancelled
+    schema_version: 1
+    description: An active subscription has been cancelled.
+    trigger: When a subscription is cancelled, whether by the user or automatically.
+    purpose: Measures churn.
+    properties:
+      - name: plan
+        type: string
+        required: false
+        common: true
+        description: A stable identifier for the plan that was cancelled, when known.
+    example: examples/payloads/subscription_cancelled.json
+
+  - name: purchase_completed
+    schema_version: 1
+    description: A one-time (non-subscription) purchase has completed successfully.
+    trigger: When payment for a one-time purchase succeeds.
+    purpose: Measures one-time purchase conversion and volume, distinct from recurring subscriptions.
+    properties:
+      - name: product_id
+        type: string
+        required: true
+        common: true
+        description: A stable identifier for what was purchased (required — the event is not meaningful without knowing what was bought).
+      - name: price
+        type: number
+        required: false
+        common: true
+        description: The purchase price in the currency's major unit. Must be accompanied by `currency` when present.
+      - name: currency
+        type: string
+        required: false
+        common: true
+        description: The ISO 4217 currency code for `price`, when `price` is present.
+      - name: quantity
+        type: integer
+        required: false
+        common: true
+        description: The number of units purchased, when more than one and meaningful to the product.
+    example: examples/payloads/purchase_completed.json

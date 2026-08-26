@@ -1,0 +1,16 @@
+{
+  "event": "screen_viewed",
+  "schema_version": 1,
+  "timestamp": "2026-01-01T09:00:05Z",
+  "app_id": "example-app",
+  "environment": "production",
+  "platform": "android",
+  "sdk_name": "react-native",
+  "sdk_version": "1.0.0",
+  "app_version": "2.4.1",
+  "anonymous_id": "ANON_002",
+  "properties": {
+    "screen_name": "home",
+    "previous_screen": "splash"
+  }
+}

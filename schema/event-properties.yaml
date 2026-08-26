@@ -1,0 +1,67 @@
+# InfinityForge Tracking — Event Property Definition Schema
+#
+# This is a schema *of schemas*: it defines the shape every entry in the
+# `properties` array of an event definition (events/*.yaml) must follow.
+# It is not itself a list of properties — see events/*.yaml for those.
+
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "InfinityForge Event Property Definition"
+description: >
+  The required shape of one property entry inside an event definition's
+  `properties` list in events/*.yaml.
+type: object
+additionalProperties: false
+
+required:
+  - name
+  - type
+  - required
+  - description
+  - common
+
+properties:
+  name:
+    $ref: "common-types.yaml#/$defs/identifier"
+    description: >
+      The property's key as it appears in the emitted event's `properties`
+      object. Must not collide with a reserved envelope field name (see
+      specification/conventions.md).
+
+  type:
+    type: string
+    enum: [string, integer, number, boolean, timestamp, enum, object, array]
+    description: >
+      The property's value type, per specification/conventions.md. When
+      `type` is `enum`, `allowed_values` is required on this entry.
+
+  required:
+    $ref: "common-types.yaml#/$defs/boolean_strict"
+    description: >
+      Whether the property must be present whenever this event is emitted.
+      Marked true only when the property's semantics are unambiguous — see
+      specification/events.md.
+
+  common:
+    $ref: "common-types.yaml#/$defs/boolean_strict"
+    description: >
+      Always true for a property defined here — it signals this is a
+      contract-defined common property with an agreed meaning across every
+      InfinityForge app. (App-specific properties are, by definition, not
+      listed in events/*.yaml at all — see specification/events.md.)
+
+  description:
+    $ref: "common-types.yaml#/$defs/non_empty_string"
+    description: "What the property represents and, where relevant, how it should be populated."
+
+  allowed_values:
+    type: array
+    minItems: 1
+    items:
+      type: string
+    description: >
+      The closed set of permitted values. Required when `type` is `enum`;
+      must not be present otherwise.
+
+# Conditional requirement (expressible in full JSON Schema via if/then, kept
+# as a documented note here to avoid over-formalizing a Phase 1 schema):
+# when `type` == "enum", `allowed_values` MUST be present and non-empty.
