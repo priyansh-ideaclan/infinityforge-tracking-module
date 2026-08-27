@@ -35,6 +35,17 @@ InfinityForge intentionally supports multiple app templates that can target the 
 
 `environment` must accurately reflect the build's actual context. An implementation must never silently default to `production` when the true environment is unknown — an unknown environment is an implementation error to be surfaced in development, not defaulted away.
 
+### Environment fallback
+
+A platform's build tooling does not always have an explicit, per-build environment value configured for it to read. When no explicit value is configured, an implementation MAY fall back to a build-time signal that reliably distinguishes "this is a development build" from "this is not" (for example, a bundler's development-mode flag) — provided that signal is set by the build tooling itself, not by application code, and cannot be spoofed by ordinary configuration.
+
+Such a fallback is an accepted exception to the rule above, under two conditions:
+
+1. The signal is used only to decide between `development` and *not* `development` — it must never be used to decide between `preview` and `production`; a build-mode flag generally cannot tell those apart.
+2. When the signal indicates "not development" and no explicit value was configured, the implementation defaults to `production` — the more restrictive, safer choice, since it suppresses development-only behavior rather than risking it in a real release build — and surfaces a lightweight diagnostic that this fallback occurred, through whatever diagnostic channel the implementation already has (specification/errors.md), rather than defaulting silently.
+
+An implementation with no such reliable build-time signal available must treat an unconfigured environment as the implementation error described above. This fallback is a narrow, documented exception — not a general license to guess.
+
 ## No duplication
 
 Each of these fields carries a single, non-overlapping purpose. Nothing here should be present in more than one place — for example, identity is only ever expressed through `user_id`/`anonymous_id`, never duplicated inside `properties`.

@@ -41,7 +41,7 @@ Applications may additionally send **app-specific properties** on any event — 
 - must not reuse a common property's name with a different meaning
 - carry no cross-app or cross-platform compatibility guarantee — they are meaningful only within the application that defines them
 
-This separation is intentional: it keeps the canonical contract small and precisely defined, while still letting individual apps track what matters to them without waiting for a change to this repository.
+This separation is intentional: it keeps the canonical contract small and precisely defined, while still letting individual apps track what matters to them without waiting for a change to this repository. See `versioning.md`'s "App-specific event schema_version" section for how such an event's `schema_version` is assigned — it is not centrally defined here either.
 
 ## Required properties are conservative by design
 
