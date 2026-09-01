@@ -1,0 +1,134 @@
+# InfinityForge Tracking — Canonical Metric Envelope
+#
+# Every metric emitted by a conforming implementation matches this
+# structure. This is a sibling to schema/event-envelope.yaml, not a
+# replacement for it — see specification/metrics.md for how the two
+# primitives (Event, Metric) relate. See specification/metric-envelope.md
+# for field-by-field meaning and ownership.
+
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "InfinityForge Tracking Metric Envelope"
+description: >
+  The fixed structure every InfinityForge raw metric (measurement) is
+  wrapped in, regardless of platform, adapter, or downstream analytics
+  provider. Deliberately reuses the identity and metadata fields already
+  defined for the event envelope rather than redefining them.
+type: object
+additionalProperties: false
+
+required:
+  - metric_name
+  - schema_version
+  - value
+  - unit
+  - source
+  - timestamp
+  - app_id
+  - environment
+  - platform
+  - sdk_version
+  - app_version
+  - anonymous_id
+
+properties:
+  metric_name:
+    $ref: "common-types.yaml#/$defs/identifier"
+    description: "The canonical or app-specific metric name (see metrics/*.yaml). Source — application/SDK, per the metric definition being emitted."
+
+  schema_version:
+    $ref: "common-types.yaml#/$defs/schema_version"
+    description: >
+      The schema_version of the metric definition being emitted (see
+      metrics/*.yaml). Same meaning and rules as an event's schema_version
+      — specification/versioning.md. Source — SDK.
+
+  value:
+    $ref: "common-types.yaml#/$defs/metric_value"
+    description: "The measured numeric value, in `unit`. Source — application/SDK, per the metric definition."
+
+  unit:
+    $ref: "common-types.yaml#/$defs/metric_unit"
+    description: "The unit `value` is expressed in. Source — fixed by the metric definition being emitted."
+
+  currency:
+    $ref: "common-types.yaml#/$defs/currency_code"
+    description: >
+      Required when unit is "currency"; must not be present otherwise. See
+      specification/metric-envelope.md.
+
+  source:
+    $ref: "common-types.yaml#/$defs/metric_source"
+    description: "The general category of system that produced this measurement. Source — application/SDK, per the metric definition."
+
+  reference_id:
+    $ref: "common-types.yaml#/$defs/non_empty_string"
+    description: >
+      An optional, stable identifier for deduplication of this specific
+      measurement (for example, a provider-issued impression or
+      transaction identifier). Absent when the source system does not
+      supply one. See specification/metrics.md's deduplication section.
+
+  timestamp:
+    $ref: "common-types.yaml#/$defs/timestamp"
+    description: >
+      Captured automatically at the moment the measurement was recorded.
+      Source — SDK.
+
+  app_id:
+    $ref: "common-types.yaml#/$defs/non_empty_string"
+    description: "Identifies the InfinityForge app/product this measurement came from. Same value an implementation reports for events. Source — application."
+
+  environment:
+    $ref: "common-types.yaml#/$defs/environment"
+    description: "See specification/metadata.md. Source — application."
+
+  platform:
+    $ref: "common-types.yaml#/$defs/platform"
+    description: "The runtime operating system the app executed on. Source — SDK."
+
+  sdk_version:
+    $ref: "common-types.yaml#/$defs/version_string"
+    description: "The version of the adapter implementing this contract. Source — SDK."
+
+  sdk_name:
+    type: string
+    minLength: 1
+    description: >
+      Identifies which conceptual adapter recorded the measurement. Same
+      meaning as on the event envelope — specification/metadata.md.
+      Optional. Source — SDK.
+
+  app_version:
+    $ref: "common-types.yaml#/$defs/version_string"
+    description: "The version/build identifier of the host application. Source — application (may be auto-read by the SDK from platform package metadata)."
+
+  user_id:
+    $ref: "common-types.yaml#/$defs/non_empty_string"
+    description: >
+      Present only once identify() has been called and not yet cleared by
+      reset() — identical rule to the event envelope. Absent (not null)
+      when there is no identified user. Source — SDK, from identity state
+      (specification/identity.md).
+
+  anonymous_id:
+    $ref: "common-types.yaml#/$defs/non_empty_string"
+    description: >
+      Always present. Identical identity value an implementation would
+      stamp on an event recorded at the same moment. Source — SDK, from
+      identity state.
+
+  dimensions:
+    type: object
+    description: >
+      Application- or SDK-provided contextual key-value pairs for this
+      measurement (for example, `plan`, `placement`, `network`). Governed
+      shape defined in schema/metric-dimensions.yaml and
+      specification/metric-envelope.md. Absent or empty when a metric has
+      no dimensions.
+
+# Fields not listed in `required` above (currency, reference_id, sdk_name,
+# user_id, dimensions) are optional at the envelope level; `currency`'s
+# conditional requirement (mandatory when unit == "currency") is a
+# metric-envelope-level rule, not expressible in this Phase 1 schema
+# without full if/then JSON Schema — see specification/metric-envelope.md
+# and validation/validate.py, which enforce it directly.

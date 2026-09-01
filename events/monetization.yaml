@@ -3,6 +3,13 @@
 # See specification/events.md for how to read this file, and
 # specification/conventions.md for currency/number conventions (amounts in
 # major units, paired with an ISO 4217 currency code).
+#
+# subscription_started, subscription_cancelled, and purchase_completed
+# each gained an optional `transaction_id` property in contract 1.2.0
+# (specification/metrics.md section 3.13 / CHANGELOG.md) — a compatible
+# addition (specification/versioning.md) that lets an accompanying
+# `revenue` metric (metrics/monetization.yaml) reference the same
+# transaction via its `reference_id`. No existing property changed.
 
 category: monetization
 
@@ -70,6 +77,16 @@ events:
         common: true
         allowed_values: [monthly, yearly, weekly, other]
         description: The billing interval for the subscription.
+      - name: transaction_id
+        type: string
+        required: false
+        common: true
+        description: >
+          A stable, source-system transaction/reference identifier for
+          this subscription's initiating charge, when the platform's
+          billing system provides one. Enables deduplication and lets an
+          accompanying `revenue` metric (metrics/monetization.yaml) be
+          linked to this event via a matching `reference_id`.
     example: examples/payloads/subscription_started.json
 
   - name: subscription_cancelled
@@ -83,6 +100,14 @@ events:
         required: false
         common: true
         description: A stable identifier for the plan that was cancelled, when known.
+      - name: transaction_id
+        type: string
+        required: false
+        common: true
+        description: >
+          A stable, source-system transaction/reference identifier for the
+          subscription being cancelled, when known. Same purpose as
+          subscription_started's transaction_id.
     example: examples/payloads/subscription_cancelled.json
 
   - name: purchase_completed
@@ -111,4 +136,14 @@ events:
         required: false
         common: true
         description: The number of units purchased, when more than one and meaningful to the product.
+      - name: transaction_id
+        type: string
+        required: false
+        common: true
+        description: >
+          A stable, source-system transaction/reference identifier for
+          this purchase, when the platform's billing system provides one.
+          Enables deduplication and lets an accompanying `revenue` metric
+          (metrics/monetization.yaml) be linked to this event via a
+          matching `reference_id`.
     example: examples/payloads/purchase_completed.json

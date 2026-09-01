@@ -14,17 +14,20 @@ Read:
 
 - New optional properties on an existing event (compatible change)
 - New events that fit an existing category, or a clearly justified new category
+- New optional dimensions on an existing metric (compatible change)
+- New metrics that fit an existing category, or a clearly justified new category — only when the underlying measurement has no reasonable home as an existing event or as a dimension on an existing metric (`specification/metric-taxonomy.md`'s "Adding a new metric")
 - Clarifications to specification documents that resolve ambiguity without changing behavior
 - New illustrative examples
 - Improvements to the validation tooling
 
 ## What requires extra scrutiny
 
-- Anything that changes the *meaning* of an existing field or event (breaking change — see `specification/versioning.md`)
-- Anything that removes or renames an event or a required property (breaking change)
-- Any new property or event intended to capture data that could be sensitive personal information — this requires explicit privacy review per `specification/privacy.md` before it is added, not after
+- Anything that changes the *meaning* of an existing field, event, or metric (breaking change — see `specification/versioning.md`)
+- Anything that removes or renames an event, a metric, or a required property/dimension (breaking change)
+- Any new property, event, metric, or dimension intended to capture data that could be sensitive personal information — this requires explicit privacy review per `specification/privacy.md` before it is added, not after
 - Any change to the identity model (`specification/identity.md`)
-- Any change to the event envelope (`schema/event-envelope.yaml`)
+- Any change to the event envelope (`schema/event-envelope.yaml`) or the metric envelope (`schema/metric-envelope.yaml`)
+- Any proposal for a metric whose value is a *derived* business/analytics number (DAU, LTV, MRR, conversion rate, or similar) rather than a raw measurement — see `specification/derived-metrics.md`; these are out of scope for this contract by design, not merely unreviewed
 
 ## Checklist for adding a new event
 
@@ -45,13 +48,36 @@ Read:
 4. Update `CHANGELOG.md`.
 5. Update any affected examples.
 
+## Checklist for adding a new metric
+
+1. Confirm the measurement doesn't already exist under a different name, and doesn't already have a reasonable home as an existing event or as a dimension on an existing metric — check `metrics/*.yaml` and `events/*.yaml`, and see `specification/metric-taxonomy.md`'s "Adding a new metric" and "Category boundaries."
+2. Confirm it is a raw fact, not a derived/aggregated business metric — see `specification/derived-metrics.md`. If it is derived, it does not belong here as a metric at all.
+3. Choose a category (`monetization`, `advertising`, `engagement`, `performance`, `reliability`, or propose a new one if none fit).
+4. Name it in `snake_case` following [`specification/conventions.md`](specification/conventions.md).
+5. Write `description`, `trigger`, and `purpose` in plain, implementation-neutral language — no mention of any specific framework, navigation library, or analytics/ad/billing vendor.
+6. Fix its `unit` (`currency`, `count`, `impression`, `millisecond`, `second`, or `other`) — a metric's unit is not chosen per-call — and its `typical_source`, per `specification/metric-envelope.md`.
+7. Define its dimensions: for each, a `name`, `type` (`string`, `integer`, `boolean`, or `enum` only), whether it is `required`, and a `description` — `allowed_values` when `type: enum`. Only mark a dimension `required` if a measurement is not meaningfully interpretable without it (as `revenue`'s `transaction_type` is).
+8. Set `schema_version: 1` for a brand-new metric.
+9. Add a corresponding example payload under `examples/metrics/`.
+10. Add the new metric to `specification/metric-taxonomy.md`'s summary table.
+11. Run the validation script (`validation/validate.py`) before opening a pull request.
+
+## Checklist for changing an existing metric or the metric envelope
+
+1. Classify the change using the compatibility table in `specification/versioning.md`.
+2. If it is breaking, follow the deprecation process described there rather than editing the field in place.
+3. Update the affected metric's `schema_version` if, and only if, the change is a breaking change to that metric's shape.
+4. Update `CHANGELOG.md`.
+5. Update any affected examples and `specification/metric-taxonomy.md`.
+
 ## Where things belong
 
 | Content | Location |
 |---|---|
 | Normative rules and semantics | `specification/` |
 | Canonical event definitions | `events/` |
-| Machine-readable envelope/property schema | `schema/` |
+| Canonical metric definitions | `metrics/` |
+| Machine-readable envelope/property/dimension schema | `schema/` |
 | Illustrative payloads | `examples/` |
 | Guidance for platform implementers | `docs/` |
 
@@ -61,9 +87,10 @@ Platform-specific implementation code never belongs in this repository, regardle
 
 Pull requests are reviewed for:
 
-- language-independence (no vendor or framework references leaking into `specification/`, `events/`, or `schema/`)
+- language-independence (no vendor or framework references leaking into `specification/`, `events/`, `metrics/`, or `schema/`)
 - consistency with existing terminology (see `specification/conventions.md`)
 - correct compatible/breaking classification
 - privacy compliance for any new data collection
+- for a new metric: that it is a raw fact, not a derived business/analytics number (`specification/derived-metrics.md`), and that it isn't a duplicate of an existing event or dimension
 
 Use `validation/validate.py` to catch structural and terminology issues before requesting review.

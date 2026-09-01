@@ -9,10 +9,17 @@
 - Every property has a valid `type`, `required`/`common` booleans, and a description
 - `enum`-typed properties have `allowed_values`; non-enum properties don't
 - No property name collides with a reserved envelope field name
+- Every metric definition in `metrics/*.yaml` has a unique, `snake_case` name
+- Every metric has `description`, `trigger`, `purpose`, `schema_version`, `unit`, `typical_source`, `dimensions`, and `example` documented
+- Every metric's `unit` and `typical_source` are among the documented allowed values, and its `example` path points to a file that exists
+- Every dimension has a valid `type` (`string`/`integer`/`boolean`/`enum` only — a narrower set than event properties), a `required` boolean, and a description
+- `enum`-typed dimensions have `allowed_values`; non-enum dimensions don't
+- No dimension name collides with a reserved metric envelope field name
 - Every file in `schema/*.yaml` is valid YAML
 - Every example payload in `examples/payloads/*.json` is valid JSON, contains the required envelope fields, references a real event name, and uses only documented `environment`/`platform` values
-- No canonical event is missing an example payload (warning, not an error)
-- No forbidden vendor or framework term (Firebase, Amplitude, Mixpanel, PostHog, Segment, RudderStack, Crashlytics, Expo Router, React Navigation, SwiftUI, UIKit, Jetpack Compose) appears anywhere in `specification/`, `events/`, or `schema/` — `docs/` is intentionally exempt, since `docs/implementation-guide.md` is allowed to name real providers when discussing provider independence
+- Every example payload in `examples/metrics/*.json` is valid JSON, contains the required metric envelope fields, references a real metric name, uses only documented `unit`/`source`/`environment`/`platform` values, has a non-negative `value`, and carries `currency` if and only if `unit` is `currency`
+- No canonical event or metric is missing an example payload (warning, not an error)
+- No forbidden vendor or framework term (Firebase, Amplitude, Mixpanel, PostHog, Segment, RudderStack, Crashlytics, Expo Router, React Navigation, SwiftUI, UIKit, Jetpack Compose, AdMob, RevenueCat, Google Analytics) appears anywhere in `specification/`, `events/`, `metrics/`, `schema/`, or `examples/` — `docs/` is intentionally exempt, since `docs/implementation-guide.md` is allowed to name real providers when discussing provider independence
 
 ## Running it
 

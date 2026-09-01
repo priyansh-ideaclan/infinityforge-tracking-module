@@ -64,7 +64,7 @@ $defs:
     type: integer
     minimum: 1
     description: >
-      The schema version of a specific event definition. See
+      The schema version of a specific event or metric definition. See
       specification/versioning.md.
 
   version_string:
@@ -80,3 +80,31 @@ $defs:
   boolean_strict:
     type: boolean
     description: Only the literal values true/false are valid — never string or integer representations.
+
+  metric_value:
+    type: number
+    minimum: 0
+    description: >
+      The measured numeric value of a metric, in the unit given by that
+      metric's `unit` (and, when `unit` is "currency", its sibling
+      `currency`). Always a non-negative magnitude — see
+      specification/metric-envelope.md for how direction (for example, a
+      refund vs. a charge) is represented without a negative number.
+
+  metric_unit:
+    type: string
+    enum: [currency, count, impression, millisecond, second, other]
+    description: >
+      The unit `value` is measured in. See specification/metric-envelope.md
+      for the full semantics of each unit, including which units require a
+      sibling `currency`. "other" is reserved for a unit not yet enumerated
+      here, mirroring `platform`'s "other" — it should be narrowed to a
+      named value here before it is used at scale.
+
+  metric_source:
+    type: string
+    enum: [application, billing_system, advertising_system, operating_system, network, provider, other]
+    description: >
+      The general category of system that produced the measurement — never
+      a specific vendor name. See specification/metric-envelope.md.
+      "other" is reserved for a source category not yet enumerated here.

@@ -1,0 +1,21 @@
+{
+  "metric_name": "operation_duration",
+  "schema_version": 1,
+  "value": 264,
+  "unit": "millisecond",
+  "source": "network",
+  "timestamp": "2026-01-05T07:00:06Z",
+  "app_id": "example-app",
+  "environment": "production",
+  "platform": "android",
+  "sdk_name": "kotlin",
+  "sdk_version": "1.0.0",
+  "app_version": "2.5.0",
+  "user_id": "USER_789",
+  "anonymous_id": "ANON_005",
+  "dimensions": {
+    "operation": "api:get_profile",
+    "operation_category": "api",
+    "outcome": "success"
+  }
+}

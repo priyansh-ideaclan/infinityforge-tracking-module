@@ -1,0 +1,20 @@
+{
+  "metric_name": "ad_impression",
+  "schema_version": 1,
+  "value": 1,
+  "unit": "impression",
+  "source": "advertising_system",
+  "timestamp": "2026-02-02T09:14:03Z",
+  "app_id": "example-app",
+  "environment": "production",
+  "platform": "ios",
+  "sdk_name": "swift",
+  "sdk_version": "1.0.0",
+  "app_version": "3.1.0",
+  "anonymous_id": "ANON_011",
+  "dimensions": {
+    "placement": "home_feed_banner",
+    "ad_format": "banner",
+    "network": "network_a"
+  }
+}

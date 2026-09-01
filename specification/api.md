@@ -1,6 +1,6 @@
 # Core Operations
 
-This document specifies the six operations of the Tracking Contract in detail. Each is described in terms of purpose, inputs, and behavior — never in terms of implementation syntax.
+This document specifies the six core operations of the Tracking Contract, plus the optional `recordMetric` operation added for implementations that support the Metrics capability (`specification/metrics.md`, `contract.md`'s "Metric conformance" section). Each is described in terms of purpose, inputs, and behavior — never in terms of implementation syntax.
 
 > Convention used below: "application" means the app code calling the operation; "SDK" means the platform adapter implementing this contract.
 
@@ -123,3 +123,25 @@ This document specifies the six operations of the Tracking Contract in detail. E
 **Failure behavior.** Must never crash the host app. If persisted state cannot be fully cleared, the implementation must still stop associating *subsequent* events with the old identity, and should surface a diagnostic in development.
 
 **Privacy considerations.** `reset` exists specifically to protect users on shared or reused devices. An implementation must not allow the previous `user_id` to reappear in event traffic once `reset` has completed.
+
+---
+
+## recordMetric (optional — Metrics capability)
+
+**Purpose.** Records a raw, measured value at a point in time — the Metric counterpart to `track`. See `specification/metrics.md` for the full semantic model of when to use a Metric instead of (or alongside) an Event.
+
+**Capability status.** Unlike the six operations above, `recordMetric` is not required for base conformance to this contract (`contract.md`'s "The six operations" / "Conformance requirements"). It is part of an optional, additive capability layer: an implementation may conform fully to this contract while exposing only the six core operations and never calling `recordMetric`. An implementation that emits any metric at all, however, must implement `recordMetric` exactly as specified here — see `contract.md`'s "Metric conformance (optional capability)" section for the precise conformance rule.
+
+**Inputs.** A `metric_name`, a `value`, a `unit`, a `source`, and an optional `currency`, `reference_id`, and `dimensions` object.
+
+**Required fields.** `metric_name` — a documented canonical metric name (`metrics/*.yaml`) or an app-specific metric name following `conventions.md`. `value` — a non-negative number. `unit` — fixed per `metric_name` by that metric's definition; the caller supplies it, but it must match the metric's documented `unit`. `source`. Any dimension the metric's own definition marks `required: true`.
+
+**Optional fields.** `currency` (required only when `unit` is `currency`, forbidden otherwise), `reference_id`, and any optional `dimensions` the metric's definition documents. Individual metrics may mark specific dimensions as required — see the metric's own definition, exactly as `track` defers to an event's own definition for its properties.
+
+**Expected behavior.** Emits exactly one metric envelope per call (`schema/metric-envelope.yaml`), stamped with the identity, metadata, and timestamp current at the moment of the call — the identical stamping rule `track` uses. `recordMetric` is conceptually fire-and-forget from the calling application's perspective, exactly like `track`: it does not return data to the application, and the application does not need to wait for it to complete.
+
+**Identity implications.** None — `recordMetric` does not change identity state. The emitted metric is associated with whichever identity is currently active (`user_id` if identified, otherwise `anonymous_id`), exactly like `track`.
+
+**Failure behavior.** A malformed metric (`specification/metrics.md` section 9, `errors.md`'s metrics subsection) must be handled per those same non-negotiable error-handling rules that govern the six core operations: never an uncaught exception, never a blocked user-facing action, corrected/dropped/queued in that order of preference.
+
+**Privacy considerations.** `dimensions` must not contain any of the prohibited data categories in `privacy.md`, including that document's metrics-specific subsection.

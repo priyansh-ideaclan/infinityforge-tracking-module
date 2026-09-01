@@ -32,6 +32,15 @@ A platform implementation conforms to this contract if all of the following hold
 
 An implementation may add app-specific events and app-specific properties beyond this contract (see `specification/events.md` for the common-vs-app-specific distinction). Doing so does not break conformance, as long as the app-specific additions themselves follow `specification/conventions.md` and `specification/privacy.md`.
 
+## Metric conformance (optional capability)
+
+`specification/metrics.md` adds a second conceptual primitive, the **Metric**, and a seventh operation, `recordMetric` (`specification/api.md`). This is an **optional, additive capability layer** on top of the base contract above, not a change to it:
+
+1. **The six operations remain the whole of base conformance.** An implementation that exposes only `initialize`, `track`, `identify`, `setUserProperties`, `screen`, and `reset`, and never calls `recordMetric`, is fully conforming under every rule in this document. Nothing above changes, and nothing above requires Metrics support.
+2. **Metrics conformance is all-or-nothing once adopted.** An implementation is not required to implement `recordMetric` at all. If it implements it — that is, if it emits even one metric — it must do so completely: every metric envelope it emits must match `schema/metric-envelope.yaml` exactly (the same fields, the same required/optional status, the same types), every canonical metric it emits must match its documented definition (`metrics/*.yaml`), and `recordMetric` itself must behave per `specification/api.md`. There is no partial or best-effort conformance to the Metrics capability — an implementation either does not use it, or follows it fully, exactly as this document already requires for the six core operations and canonical events.
+3. **Every other conformance rule extends to Metrics unchanged.** Identity compliance, privacy compliance, error isolation, and version discipline (items 4, 6, 7, 8 above) apply to metrics exactly as they apply to events — see `specification/metrics.md`, `specification/privacy.md`'s metrics subsection, `specification/errors.md`'s metrics subsection, and `specification/versioning.md`'s "Metric schema_version" section, respectively.
+4. **App-specific metrics.** The same allowance as for app-specific events: an implementation may record metrics beyond the canonical taxonomy (`specification/metric-taxonomy.md`) without breaking conformance, provided they follow `specification/conventions.md`, `specification/privacy.md`, and `specification/versioning.md`'s app-specific metric `schema_version` rule.
+
 ## Cross-platform guarantees
 
 Because every conforming implementation follows the same envelope, the same identity model, and the same canonical event definitions, data collected from different app templates can be:

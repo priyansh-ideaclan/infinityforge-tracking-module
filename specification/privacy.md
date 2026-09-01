@@ -1,6 +1,6 @@
 # Privacy Rules
 
-These rules are platform-independent and apply to every event, every property, and every user-level attribute set through this contract, regardless of which adapter or analytics provider ultimately receives the data.
+These rules are platform-independent and apply to every event, every property, every metric, every dimension, and every user-level attribute set through this contract, regardless of which adapter or analytics provider ultimately receives the data.
 
 ## Prohibited data categories
 
@@ -25,6 +25,16 @@ If a genuinely justified need arises to collect something that could be consider
 ## Scope of these rules
 
 These rules apply equally to canonical events (`events/*.yaml`) and to app-specific events and properties that applications add on top of this contract. Being outside the canonical taxonomy does not exempt a property from these rules.
+
+## Metrics and dimensions
+
+Everything above applies to a metric's `dimensions` exactly as it applies to an event's `properties` — the prohibited data categories, the "behavior and state, not identity or sensitive content" principle, and the exceptional-data review process all carry over unchanged. This section adds the rules specific to the metric shape introduced in this phase (`specification/metrics.md`, `specification/metric-envelope.md`).
+
+- **Dimension cardinality.** A dimension's allowed types are already restricted to `string`, `integer`, `boolean`, and `enum` (`schema/metric-dimensions.yaml`), and a dimension's value must be a bounded, low-cardinality category — never free text, and never a value whose cardinality approaches the number of users or events (a raw identifier, a timestamp-derived string, a user-entered string). A `string`-typed dimension is for a bounded label (a placement name, an operation name) drawn from a small, application-controlled set — not an open text field. Where a dimension's set of valid values is small and fixed, `enum` is preferred over `string` specifically because it is easier to audit for accidental high-cardinality or sensitive content.
+- **`reference_id` opacity.** `reference_id` (`schema/metric-envelope.yaml`) must be an opaque identifier — a transaction ID, an order ID, or similar handle meaningful only for correlating a metric back to its source system or to a related event's `transaction_id`. It must never itself carry personal information (for example, it must not be a concatenation that embeds an email address or a name) and must never be a payment card or account number.
+- **`error_code` opacity.** `handled_error`'s `error_code` dimension (`metrics/reliability.yaml`) must be a stable, application-defined error category or code (for example, `sync_conflict`, `E_TIMEOUT`) — never a raw exception message, stack trace fragment, or free-form string that could incidentally contain user data. A raw message belongs in server-side or crash-reporting tooling outside this contract's scope (`specification/metrics.md` section 3.8), not in a tracked dimension.
+- **No monetary precision leak.** `revenue` and `ad_revenue`'s `value` (`specification/metric-envelope.md`) is a measurement of a transaction amount, not a place to encode anything beyond that amount — implementations must not, for example, encode a per-user discount code or promotional identifier into `value` or into a dimension in a way that narrows a monetary figure down to an identifiable individual transaction pattern beyond what `reference_id` already exists to carry.
+- **Review and approval.** The same exceptional-data review process (above) governs any proposed metric or dimension that might touch a prohibited data category — there is no separate, lighter-weight review path for metrics.
 
 ## What this document does not claim
 

@@ -1,0 +1,53 @@
+# InfinityForge Tracking — Reliability Metrics
+#
+# See specification/metrics.md section 3.8. This file defines what this
+# contract records about handled errors and operational failures only.
+# It explicitly does NOT define a crash-reporting metric, event, or
+# contract of any kind — crash capture (stack traces, native crash
+# symbolication, and similar) is a distinct concern with its own
+# provider-specific mechanisms, out of scope for this Phase. See
+# specification/metrics.md for the full rationale and the
+# recoverable-error / operational-failure / crash distinction.
+
+category: reliability
+
+metrics:
+  - name: handled_error
+    schema_version: 1
+    description: >
+      One occurrence of an error or failure the application detected and
+      handled (i.e., did not crash from) — a recoverable application
+      error or an operational failure, never a crash.
+    trigger: >
+      When the application catches or otherwise detects an error or
+      operational failure it considers worth measuring. Each occurrence is
+      its own measurement (`value` is always 1, `unit` is "count");
+      aggregate counts are computed downstream from however many of these
+      measurements exist for a given window/category.
+    purpose: >
+      Raw reliability signal — how often, and in what category, handled
+      errors and operational failures occur. Not a crash report and not a
+      substitute for one.
+    unit: count
+    typical_source: application
+    dimensions:
+      - name: category
+        type: enum
+        required: true
+        allowed_values: [recoverable_error, operational_failure]
+        description: >
+          Whether this was an application-level error the app recovered
+          from in the normal course of handling it (recoverable_error), or
+          a failure of some operation the app depends on — a network
+          request, a storage read/write, a third-party call
+          (operational_failure). Required — never "crash": this contract
+          defines no crash category and no crash-reporting semantics.
+      - name: error_code
+        type: string
+        required: false
+        description: >
+          A stable, application-defined error code or category
+          identifier — never a free-form message, stack trace, or any
+          value that could contain personal information
+          (specification/privacy.md).
+    example: examples/metrics/handled_error.json

@@ -31,7 +31,7 @@ This repository sits above every platform template. Platform teams build an adap
 
 ## Design principles
 
-**Platform neutrality.** Nothing in `specification/`, `events/`, or `schema/` may reference a specific programming language, UI framework, navigation library, or analytics vendor. If a rule can only be expressed by naming a specific technology, it does not belong in this contract — it belongs in a platform adapter's own documentation.
+**Platform neutrality.** Nothing in `specification/`, `events/`, `metrics/`, or `schema/` may reference a specific programming language, UI framework, navigation library, or analytics vendor. If a rule can only be expressed by naming a specific technology, it does not belong in this contract — it belongs in a platform adapter's own documentation.
 
 **Behavioral compatibility over implementation uniformity.** Two adapters do not need to share code, architecture, or internal design. They need to produce event data that is structurally and semantically compatible, so that data from a React Native app and a Swift app can be joined and compared meaningfully.
 
@@ -70,6 +70,11 @@ Those are all legitimate future work, but they build *on top of* this contract i
 | Understand how the contract evolves over time | `specification/versioning.md` |
 | Understand the event taxonomy and how events are documented | `specification/events.md` |
 | See the canonical event definitions | `events/*.yaml` |
-| See the machine-readable envelope and property schema | `schema/*.yaml` |
+| Understand the Metric primitive, when to use it, and the full semantic model for each metric capability | `specification/metrics.md` |
+| Understand the metric envelope fields, value/unit/currency/source semantics, and dimensions | `specification/metric-envelope.md` |
+| See the canonical metric taxonomy | `specification/metric-taxonomy.md` |
+| Understand why derived business metrics (DAU, LTV, MRR, ...) are never emitted directly | `specification/derived-metrics.md` |
+| See the canonical metric definitions | `metrics/*.yaml` |
+| See the machine-readable envelope and property/dimension schema | `schema/*.yaml` |
 | See what conforming data looks like | `examples/` |
 | Implement a new platform adapter | `docs/implementation-guide.md` |

@@ -1,0 +1,94 @@
+# InfinityForge Tracking — Advertising Metrics
+#
+# See specification/metrics.md section 3.2/3.3 for the full semantics,
+# including why an "impression" must represent an actual measured
+# occurrence rather than a request, load, or screen-open.
+
+category: advertising
+
+metrics:
+  - name: ad_impression
+    schema_version: 1
+    description: >
+      A single advertisement was actually shown to and measured as viewed
+      by the user — not merely requested, loaded, or made ready to show.
+    trigger: >
+      When the source ad system confirms the impression was measured (its
+      own impression-counting moment), not when the application requests
+      or receives an ad, and not when an ad-containing screen is opened.
+    purpose: >
+      The raw count of realized ad exposure, independent of ad_revenue —
+      used downstream (with ad_revenue) to calculate eCPM and fill/exposure
+      analysis. See specification/derived-metrics.md.
+    unit: impression
+    typical_source: advertising_system
+    fixed_value: 1
+    # fixed_value: every measurement of this metric represents exactly one
+    # impression, so `value` must always equal this number — see
+    # specification/metrics.md section 3.2 and section 5's note that a
+    # canonical metric's documented value meaning must not be silently
+    # repurposed (for example, to represent a pre-aggregated batch count).
+    # validation/validate.py enforces this against examples/metrics/*.json.
+    dimensions:
+      - name: placement
+        type: string
+        required: false
+        description: A stable identifier for where in the application this ad was shown.
+      - name: ad_format
+        type: enum
+        required: false
+        allowed_values: [banner, interstitial, rewarded, native, other]
+        description: The general category of ad format shown.
+      - name: network
+        type: string
+        required: false
+        description: >
+          A stable identifier for the ad network/provider that served this
+          impression, when the application tracks that. Not a normative
+          vendor list — this contract names no specific ad network.
+    example: examples/metrics/ad_impression.json
+
+  - name: ad_revenue
+    schema_version: 1
+    description: >
+      A monetary value attributed to advertising, as reported by the
+      advertising source (directly per-impression, or estimated/aggregated
+      by that source, depending on what the source itself provides).
+    trigger: >
+      When the advertising source reports a revenue value for one or more
+      impressions. An implementation receives this from provider-specific
+      callbacks (exact vs. estimated, per-impression vs. aggregated), but
+      this normalized measurement itself carries no provider-specific
+      shape — see docs/implementation-guide.md for provider adapter
+      guidance.
+    purpose: >
+      The monetary counterpart to ad_impression — used downstream (with
+      ad_impression) to calculate eCPM. See specification/derived-metrics.md.
+    unit: currency
+    typical_source: advertising_system
+    dimensions:
+      - name: placement
+        type: string
+        required: false
+        description: A stable identifier for where in the application the underlying ad(s) were shown.
+      - name: ad_format
+        type: enum
+        required: false
+        allowed_values: [banner, interstitial, rewarded, native, other]
+        description: The general category of ad format this revenue relates to.
+      - name: network
+        type: string
+        required: false
+        description: >
+          A stable identifier for the ad network/provider that reported
+          this revenue, when the application tracks that.
+      - name: precision
+        type: enum
+        required: false
+        allowed_values: [exact, estimated]
+        description: >
+          Whether the source reported an exact, confirmed revenue value or
+          an estimate (common for ad mediation, where per-impression
+          revenue is frequently modeled rather than exactly known).
+          Omitted when the implementation cannot determine which.
+    example: examples/metrics/ad_revenue.json

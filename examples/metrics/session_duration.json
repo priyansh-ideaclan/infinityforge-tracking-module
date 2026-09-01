@@ -1,7 +1,10 @@
 {
-  "event": "subscription_cancelled",
+  "metric_name": "session_duration",
   "schema_version": 1,
-  "timestamp": "2026-03-13T10:01:20Z",
+  "value": 342,
+  "unit": "second",
+  "source": "application",
+  "timestamp": "2026-02-04T21:10:00Z",
   "app_id": "example-app",
   "environment": "production",
   "platform": "android",
@@ -10,8 +13,5 @@
   "app_version": "2.5.0",
   "user_id": "USER_789",
   "anonymous_id": "ANON_005",
-  "properties": {
-    "plan": "premium",
-    "transaction_id": "TXN_7B21E9"
-  }
+  "dimensions": {}
 }

@@ -24,7 +24,7 @@ This repository defines the contract once. Each box above is a separate implemen
 
 Regardless of language or platform, a conforming adapter must:
 
-- **Expose the same conceptual API.** All six operations from `specification/api.md` (`initialize`, `track`, `identify`, `setUserProperties`, `screen`, `reset`), under whatever calling convention is idiomatic for the platform. The names, argument order, and calling style are the adapter's own choice — the behavior is not.
+- **Expose the same conceptual API.** All six core operations from `specification/api.md` (`initialize`, `track`, `identify`, `setUserProperties`, `screen`, `reset`), under whatever calling convention is idiomatic for the platform. The names, argument order, and calling style are the adapter's own choice — the behavior is not.
 - **Produce compatible event schemas.** Every event emitted matches `schema/event-envelope.yaml`, and every canonical event it emits matches its definition in `events/*.yaml` — same field names, same required/optional status, same types, same `snake_case` casing (`specification/conventions.md`), regardless of what casing convention is idiomatic inside the adapter's own language.
 - **Follow the same identity rules.** `specification/identity.md`, without exception — including generating a new `anonymous_id` on `reset`, not reusing the old one.
 - **Follow the same privacy rules.** `specification/privacy.md`. An adapter must not make it easier for application code to accidentally violate these rules than to follow them — for example, it should not expose a convenience method that encourages passing arbitrary free-form objects as event properties without any review.
@@ -54,6 +54,14 @@ Before considering a platform adapter complete, verify:
 - [ ] No operation can throw an uncaught exception or block a user-facing action, per `specification/errors.md`
 - [ ] The adapter's own version is reported accurately as `sdk_version`
 
+If the adapter also supports the optional Metrics capability, additionally verify:
+
+- [ ] `recordMetric` is implemented and behaves as specified in `specification/api.md`
+- [ ] Emitted metrics validate against `schema/metric-envelope.yaml`
+- [ ] Every canonical metric emitted matches its `metrics/*.yaml` definition (fixed `unit`, required dimensions present, types correct, `schema_version` correct)
+- [ ] No prohibited data category from `specification/privacy.md`, including its metrics-specific subsection, can reach a dimension through the adapter's normal usage
+- [ ] `recordMetric` cannot throw an uncaught exception or block a user-facing action, per `specification/errors.md`'s metrics subsection
+
 ## Provider independence and future providers
 
 This contract is deliberately independent of any specific analytics vendor. An adapter may send events to one provider, several, or none yet — that choice, and any provider-specific integration code, belongs entirely inside the adapter, never in this repository.
@@ -66,6 +74,15 @@ Providers an implementation might eventually integrate with include (without thi
 - other analytics systems, present or future
 
 If InfinityForge changes which provider(s) an app template sends data to, that is a change to the adapter, not to this contract. The contract remains valid, and existing event data remains meaningful, regardless of which provider is receiving it at any given time.
+
+## Implementing the Metrics capability
+
+`specification/metrics.md`, `specification/metric-envelope.md`, and `metrics/*.yaml` define an optional, additive capability layer on top of the base six-operation contract (`specification/contract.md`'s "Metric conformance" section). An adapter is not required to implement it; if it does, `recordMetric` must be implemented completely, not partially.
+
+- **Mapping a provider's own concepts onto the normalized shape.** A billing/subscription provider's transaction callback maps onto `revenue` (`metrics/monetization.yaml`); an advertising mediation SDK's impression- and revenue-level callbacks map onto `ad_impression`/`ad_revenue` (`metrics/advertising.yaml`). Whatever native shape a provider reports in — a delegate callback, a promise, a provider-specific object — the adapter is responsible for translating it into the normalized envelope and dimensions this contract defines; no provider-specific field name or structure should leak into the emitted `dimensions` or `source` value.
+- **Providers an implementation might eventually integrate with for metrics** include, without this repository selecting or endorsing any of them: a billing/subscription provider, an advertising mediation SDK, a custom InfinityForge backend, or other measurement systems, present or future. As with events, this repository names no specific vendor as required or assumed.
+- **`typical_source` is guidance, not enforcement.** Each canonical metric definition documents a `typical_source` (`specification/metric-envelope.md`), but an adapter may legitimately use a different `source` category when its actual measurement genuinely comes from a different kind of system — the schema does not hard-lock `source` per metric name.
+- **Do not invent a derived metric.** An adapter must never calculate and emit a derived business/analytics number (DAU, LTV, MRR, conversion rate, or similar — `specification/derived-metrics.md`) as if it were a raw metric. If a provider SDK exposes such a calculated value directly, the adapter should not forward it through `recordMetric` at all — that calculation belongs downstream, not on-device.
 
 ## Adding a new platform template
 

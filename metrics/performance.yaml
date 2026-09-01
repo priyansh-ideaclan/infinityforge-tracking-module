@@ -1,0 +1,85 @@
+# InfinityForge Tracking — Performance Metrics
+#
+# See specification/metrics.md section 3.7. app_launch_duration and
+# screen_load_duration are named separately because they are common,
+# foundational measurements every implementation is likely to record.
+# Every other measurable operation duration (API latency, network timing,
+# storage/database timing, or anything else) is unified under the single
+# generic operation_duration metric, disambiguated by its `operation`
+# dimension, rather than defining a separate named metric per operation
+# kind — see specification/metrics.md for the rationale.
+
+category: performance
+
+metrics:
+  - name: app_launch_duration
+    schema_version: 1
+    description: How long the application took to become ready for user interaction after being launched.
+    trigger: When a launch (cold or warm) completes and the application is ready for interaction.
+    purpose: The foundational startup-performance signal.
+    unit: millisecond
+    typical_source: application
+    dimensions:
+      - name: launch_type
+        type: enum
+        required: false
+        allowed_values: [cold, warm]
+        description: >
+          Whether this was a full cold start or a resume from the
+          background, when the implementation can reliably distinguish
+          the two — the same distinction events/application.yaml's
+          app_opened.launch_type uses.
+    example: examples/metrics/app_launch_duration.json
+
+  - name: screen_load_duration
+    schema_version: 1
+    description: How long a specific screen took to become ready for user interaction after navigation to it began.
+    trigger: When a screen finishes loading and is ready for interaction.
+    purpose: Screen-level performance signal, comparable across screens and releases.
+    unit: millisecond
+    typical_source: application
+    dimensions:
+      - name: screen_name
+        type: string
+        required: true
+        description: >
+          The same stable, logical screen identifier used for
+          screen_viewed's screen_name (specification/screen-tracking.md).
+          Required — the measurement is not meaningful without knowing
+          which screen it describes.
+    example: examples/metrics/screen_load_duration.json
+
+  - name: operation_duration
+    schema_version: 1
+    description: >
+      How long one measurable, named operation took to complete — a
+      generic timing measurement for API latency, network timing,
+      storage/database timing, or any other operation an implementation
+      wants to measure that isn't app launch or screen load.
+    trigger: When a measured operation completes (successfully or not).
+    purpose: >
+      A single, extensible performance signal for operations too numerous
+      or too implementation-specific to each warrant their own named
+      metric.
+    unit: millisecond
+    typical_source: application
+    dimensions:
+      - name: operation
+        type: string
+        required: true
+        description: >
+          A stable, logical identifier for the operation measured (for
+          example, "api:get_profile", "storage:read_cache"). Required —
+          the measurement is not meaningful without knowing what it
+          timed. Must not contain dynamic values (specification/privacy.md).
+      - name: operation_category
+        type: enum
+        required: false
+        allowed_values: [api, network, storage, other]
+        description: A general grouping for the operation, when useful for analysis across many operation names.
+      - name: outcome
+        type: enum
+        required: false
+        allowed_values: [success, failure]
+        description: Whether the measured operation completed successfully, when known and meaningful.
+    example: examples/metrics/operation_duration.json

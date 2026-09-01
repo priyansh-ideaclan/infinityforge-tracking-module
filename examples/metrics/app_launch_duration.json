@@ -1,0 +1,18 @@
+{
+  "metric_name": "app_launch_duration",
+  "schema_version": 1,
+  "value": 812,
+  "unit": "millisecond",
+  "source": "application",
+  "timestamp": "2026-01-05T07:00:01Z",
+  "app_id": "example-app",
+  "environment": "production",
+  "platform": "ios",
+  "sdk_name": "swift",
+  "sdk_version": "1.0.0",
+  "app_version": "3.1.0",
+  "anonymous_id": "ANON_011",
+  "dimensions": {
+    "launch_type": "cold"
+  }
+}

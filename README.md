@@ -10,9 +10,10 @@ This repository does not contain an analytics SDK. It contains the **Tracking Co
 
 `infinityforge-tracking-module` defines *what* InfinityForge tracking means, independent of any programming language, mobile framework, or analytics vendor. It specifies:
 
-- the core tracking operations (`initialize`, `track`, `identify`, `setUserProperties`, `screen`, `reset`)
-- the canonical event envelope every event is wrapped in
+- the core tracking operations (`initialize`, `track`, `identify`, `setUserProperties`, `screen`, `reset`), plus the optional `recordMetric` operation for implementations that support the Metrics capability
+- the canonical event envelope every event is wrapped in, and the metric envelope every metric is wrapped in
 - the initial event taxonomy (application, authentication, onboarding, product, monetization)
+- the metric taxonomy (monetization, advertising, engagement, performance, reliability) — raw measurements, distinct from both events and from derived/aggregated business metrics (see `specification/metrics.md`, `specification/derived-metrics.md`)
 - identity rules (anonymous vs. authenticated state, login, logout, account switching)
 - screen tracking semantics
 - metadata ownership (who supplies which field, and when)
@@ -57,7 +58,7 @@ Platform-specific implementations of this contract live in their respective app 
 
 ## 6. How platform templates consume the contract
 
-Each app template implements an **adapter (or SDK)** that exposes the six operations defined in [`specification/api.md`](specification/api.md), emits events matching the envelope defined in [`schema/event-envelope.yaml`](schema/event-envelope.yaml), and follows the identity, privacy, error, and versioning rules defined in `specification/`. The adapter is free to choose its own internal implementation, its own analytics vendor(s), and its own idiomatic API surface for its language — as long as the conceptual contract and the resulting event data are preserved.
+Each app template implements an **adapter (or SDK)** that exposes the six core operations defined in [`specification/api.md`](specification/api.md), emits events matching the envelope defined in [`schema/event-envelope.yaml`](schema/event-envelope.yaml), and follows the identity, privacy, error, and versioning rules defined in `specification/`. The adapter is free to choose its own internal implementation, its own analytics vendor(s), and its own idiomatic API surface for its language — as long as the conceptual contract and the resulting event data are preserved. An adapter may additionally support the optional Metrics capability — `recordMetric`, matching [`schema/metric-envelope.yaml`](schema/metric-envelope.yaml) — but is not required to; see [`specification/contract.md`](specification/contract.md)'s "Metric conformance" section.
 
 ```
 InfinityForge Tracking Contract
@@ -93,8 +94,8 @@ InfinityForge anticipates additional app templates over time — potentially inc
 This repository defines its own versioned contract, independent of any implementation's release cycle. See [`specification/versioning.md`](specification/versioning.md) for the full policy. In short:
 
 - the **contract** has a semantic version (currently tracked in [`CHANGELOG.md`](CHANGELOG.md))
-- each **event** carries its own integer `schema_version`
-- additive, backward-compatible changes (e.g., a new optional property) do not require a major version bump
+- each **event** and each **metric** carries its own integer `schema_version`
+- additive, backward-compatible changes (e.g., a new optional property or a new optional dimension) do not require a major version bump
 - changes that alter meaning, remove fields, or rename events are breaking and follow the deprecation process described in `specification/versioning.md`
 
 ## 10. How developers propose changes
@@ -122,7 +123,11 @@ infinityforge-tracking-module/
 │   ├── privacy.md
 │   ├── errors.md
 │   ├── versioning.md
-│   └── events.md
+│   ├── events.md
+│   ├── metrics.md            # Metric primitive, capability semantics, deduplication, sampling
+│   ├── metric-envelope.md    # Metric envelope fields, value/unit/currency/source, dimensions
+│   ├── metric-taxonomy.md    # Canonical metric list
+│   └── derived-metrics.md    # Why derived business metrics are never emitted directly
 │
 ├── events/                 # Canonical event taxonomy (machine-readable)
 │   ├── application.yaml
@@ -131,14 +136,24 @@ infinityforge-tracking-module/
 │   ├── product.yaml
 │   └── monetization.yaml
 │
+├── metrics/                 # Canonical metric taxonomy (machine-readable)
+│   ├── monetization.yaml
+│   ├── advertising.yaml
+│   ├── engagement.yaml
+│   ├── performance.yaml
+│   └── reliability.yaml
+│
 ├── schema/                 # Machine-readable schema (JSON Schema-flavored YAML)
 │   ├── common-types.yaml
 │   ├── event-envelope.yaml
-│   └── event-properties.yaml
+│   ├── event-properties.yaml
+│   ├── metric-envelope.yaml
+│   └── metric-dimensions.yaml
 │
 ├── examples/
 │   ├── events/              # Illustrative multi-call sequences
-│   └── payloads/             # One full example payload per canonical event
+│   ├── payloads/             # One full example payload per canonical event
+│   └── metrics/               # One full example payload per canonical metric
 │
 ├── docs/
 │   └── implementation-guide.md
@@ -153,3 +168,4 @@ infinityforge-tracking-module/
 - New to this repository? Start with [`specification/overview.md`](specification/overview.md).
 - Implementing a platform adapter? Start with [`specification/api.md`](specification/api.md) and [`docs/implementation-guide.md`](docs/implementation-guide.md).
 - Adding or changing an event? Start with [`specification/events.md`](specification/events.md) and [`CONTRIBUTING.md`](CONTRIBUTING.md).
+- Adding or changing a metric? Start with [`specification/metrics.md`](specification/metrics.md), [`specification/metric-taxonomy.md`](specification/metric-taxonomy.md), and [`CONTRIBUTING.md`](CONTRIBUTING.md).

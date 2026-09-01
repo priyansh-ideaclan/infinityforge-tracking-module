@@ -1,0 +1,66 @@
+# InfinityForge Tracking — Monetization Metrics
+#
+# See specification/metrics.md for how to read this file, and
+# specification/metric-envelope.md for the envelope fields (value, unit,
+# currency, source, dimensions) every metric shares.
+#
+# Relationship to events/monetization.yaml: purchase_completed,
+# subscription_started, and subscription_cancelled remain the canonical
+# EVENTS recording that a business occurrence happened — this file is not
+# a replacement for them. `revenue` is the normalized MEASUREMENT of
+# monetary value realized; it may accompany a purchase/subscription event
+# (linked via the shared `reference_id`/`transaction_id`) or stand alone
+# for a monetization occurrence that has no discrete event of its own in
+# this contract today (a subscription renewal charge, a refund). See
+# specification/metrics.md section 3.1 for the full explanation.
+
+category: monetization
+
+metrics:
+  - name: revenue
+    schema_version: 1
+    description: >
+      A monetary value realized from the user, in either direction (a
+      charge or a refund/adjustment of one).
+    trigger: >
+      When a payment/subscription system confirms a monetary transaction —
+      a charge, a refund, or another adjustment to a prior charge.
+    purpose: >
+      The single normalized monetary fact used, downstream, to calculate
+      revenue-derived metrics (MRR, ARR, LTV, ARPU, ARPPU — see
+      specification/derived-metrics.md). Not itself a business event; see
+      events/monetization.yaml for the purchase/subscription occurrences
+      this measurement typically accompanies.
+    unit: currency
+    typical_source: billing_system
+    dimensions:
+      - name: transaction_type
+        type: enum
+        required: true
+        allowed_values: [charge, refund, adjustment]
+        description: >
+          The direction/nature of this monetary value. `value` is always a
+          non-negative magnitude (schema/common-types.yaml#metric_value) —
+          this dimension carries direction instead of a signed number, so
+          a refund is unambiguous rather than inferred from a negative
+          value. Required: a revenue measurement is not interpretable
+          without knowing which of these it is.
+      - name: billing_type
+        type: enum
+        required: false
+        allowed_values: [subscription, one_time, other]
+        description: >
+          Whether this revenue relates to a recurring subscription or a
+          one-time purchase, when known. See specification/metrics.md
+          section 3.1 for why this is a dimension here rather than a
+          reason to define separate "subscription revenue" and "purchase
+          revenue" metrics.
+      - name: product_id
+        type: string
+        required: false
+        description: >
+          A stable identifier for the product or plan this revenue
+          relates to, when applicable — the same identifier an
+          accompanying purchase_completed/subscription_started event
+          would use for its `product_id`/`plan` property.
+    example: examples/metrics/revenue.json

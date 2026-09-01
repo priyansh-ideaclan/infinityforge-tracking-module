@@ -1,0 +1,23 @@
+{
+  "metric_name": "revenue",
+  "schema_version": 1,
+  "value": 4.99,
+  "unit": "currency",
+  "currency": "USD",
+  "source": "billing_system",
+  "reference_id": "TXN_7B21E9",
+  "timestamp": "2026-01-13T10:01:22Z",
+  "app_id": "example-app",
+  "environment": "production",
+  "platform": "android",
+  "sdk_name": "kotlin",
+  "sdk_version": "1.0.0",
+  "app_version": "2.4.1",
+  "user_id": "USER_789",
+  "anonymous_id": "ANON_005",
+  "dimensions": {
+    "transaction_type": "charge",
+    "billing_type": "subscription",
+    "product_id": "premium"
+  }
+}

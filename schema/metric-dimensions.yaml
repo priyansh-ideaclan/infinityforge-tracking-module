@@ -1,0 +1,68 @@
+# InfinityForge Tracking — Metric Dimension Definition Schema
+#
+# This is a schema *of schemas*, mirroring schema/event-properties.yaml: it
+# defines the shape every entry in the `dimensions` array of a metric
+# definition (metrics/*.yaml) must follow. It is not itself a list of
+# dimensions — see metrics/*.yaml for those.
+#
+# Dimensions are governed more tightly than event properties (see
+# specification/metric-envelope.md and specification/metrics.md's
+# dimensions section): only flat primitive types are allowed, to keep
+# cardinality bounded and prevent dimensions from becoming an unbounded,
+# ungoverned bag of data.
+
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "InfinityForge Metric Dimension Definition"
+description: >
+  The required shape of one dimension entry inside a metric definition's
+  `dimensions` list in metrics/*.yaml.
+type: object
+additionalProperties: false
+
+required:
+  - name
+  - type
+  - required
+  - description
+
+properties:
+  name:
+    $ref: "common-types.yaml#/$defs/identifier"
+    description: >
+      The dimension's key as it appears in the emitted metric's
+      `dimensions` object. Must not collide with a reserved metric
+      envelope field name (see specification/metric-envelope.md).
+
+  type:
+    type: string
+    enum: [string, integer, boolean, enum]
+    description: >
+      The dimension's value type. Deliberately narrower than an event
+      property's allowed types (no `number`, `timestamp`, `object`, or
+      `array`) — dimensions are context labels, not measurements or
+      nested structures. When `type` is `enum`, `allowed_values` is
+      required on this entry.
+
+  required:
+    $ref: "common-types.yaml#/$defs/boolean_strict"
+    description: >
+      Whether the dimension must be present whenever this metric is
+      emitted. Marked true only when the metric is not meaningful without
+      it.
+
+  description:
+    $ref: "common-types.yaml#/$defs/non_empty_string"
+    description: "What the dimension represents and, where relevant, how it should be populated."
+
+  allowed_values:
+    type: array
+    minItems: 1
+    items:
+      type: string
+    description: >
+      The closed set of permitted values. Required when `type` is `enum`;
+      must not be present otherwise.
+
+# Conditional requirement, documented rather than formalized (matching
+# schema/event-properties.yaml's own approach): when `type` == "enum",
+# `allowed_values` MUST be present and non-empty.

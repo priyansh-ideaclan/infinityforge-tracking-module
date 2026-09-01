@@ -1,0 +1,22 @@
+{
+  "metric_name": "ad_revenue",
+  "schema_version": 1,
+  "value": 0.0123,
+  "unit": "currency",
+  "currency": "USD",
+  "source": "advertising_system",
+  "timestamp": "2026-02-02T09:14:03Z",
+  "app_id": "example-app",
+  "environment": "production",
+  "platform": "ios",
+  "sdk_name": "swift",
+  "sdk_version": "1.0.0",
+  "app_version": "3.1.0",
+  "anonymous_id": "ANON_011",
+  "dimensions": {
+    "placement": "home_feed_banner",
+    "ad_format": "banner",
+    "network": "network_a",
+    "precision": "estimated"
+  }
+}

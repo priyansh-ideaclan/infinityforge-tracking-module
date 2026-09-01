@@ -1,0 +1,31 @@
+# InfinityForge Tracking — Engagement Metrics
+#
+# See specification/metrics.md section 3.6. This file intentionally
+# defines only the raw measurement gap not already covered by existing
+# engagement-adjacent EVENTS (app_opened, screen_viewed, feature_used —
+# events/application.yaml, events/product.yaml): how long a session
+# lasted. Session/screen/feature *occurrence* is already captured by those
+# events; DAU/WAU/MAU/engagement rate are derived downstream from event
+# occurrence counts and are not defined here — see
+# specification/derived-metrics.md.
+
+category: engagement
+
+metrics:
+  - name: session_duration
+    schema_version: 1
+    description: The length of one completed user session.
+    trigger: >
+      When a session the application considers meaningful and complete has
+      ended, and its duration is known. This contract does not define what
+      constitutes a session boundary (that is an application decision,
+      applied consistently) — only the shape of the resulting measurement
+      once one is known.
+    purpose: >
+      Raw session-length data, used downstream for average session
+      duration and engagement analysis. Not itself DAU/WAU/MAU or an
+      engagement rate — see specification/derived-metrics.md.
+    unit: second
+    typical_source: application
+    dimensions: []
+    example: examples/metrics/session_duration.json
