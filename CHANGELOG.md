@@ -6,7 +6,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Ver
 
 ## [Unreleased]
 
-_No unreleased changes yet._
+### Fixed
+
+- Encoded `handled_error`'s existing `value == 1` rule as `fixed_value: 1`, so machine-readable contract consumers and validation enforce the same semantics already required by the normative prose.
 
 ## [1.2.0] - 2026-09-01
 

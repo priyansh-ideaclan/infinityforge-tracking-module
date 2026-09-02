@@ -30,6 +30,11 @@ metrics:
       substitute for one.
     unit: count
     typical_source: application
+    fixed_value: 1
+    # Every handled_error measurement represents exactly one handled
+    # occurrence. Aggregate counts are derived downstream rather than sent
+    # as a larger client-side value. validation/validate.py enforces this
+    # rule against examples/metrics/*.json.
     dimensions:
       - name: category
         type: enum

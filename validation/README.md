@@ -12,6 +12,7 @@
 - Every metric definition in `metrics/*.yaml` has a unique, `snake_case` name
 - Every metric has `description`, `trigger`, `purpose`, `schema_version`, `unit`, `typical_source`, `dimensions`, and `example` documented
 - Every metric's `unit` and `typical_source` are among the documented allowed values, and its `example` path points to a file that exists
+- Every declared metric `fixed_value` is a non-negative number, and each matching example uses that exact value
 - Every dimension has a valid `type` (`string`/`integer`/`boolean`/`enum` only — a narrower set than event properties), a `required` boolean, and a description
 - `enum`-typed dimensions have `allowed_values`; non-enum dimensions don't
 - No dimension name collides with a reserved metric envelope field name

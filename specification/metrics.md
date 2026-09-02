@@ -191,7 +191,7 @@ Each subsection below follows the same structure: Definition, Purpose, Required 
 
 **Example.** `examples/metrics/handled_error.json`.
 
-**Validation rules.** `dimensions.category` present and one of the two allowed values (never a third, undocumented value meaning "crash" — section 9).
+**Validation rules.** `value` is fixed to `1`; `dimensions.category` is present and one of the two allowed values (never a third, undocumented value meaning "crash" — section 9).
 
 **Versioning implications.** Standard metric `schema_version` model (section 11).
 
@@ -274,6 +274,7 @@ A metric is malformed under the same general definition `errors.md` already uses
 - a required envelope field is missing, empty, or the wrong type (`schema/metric-envelope.yaml`)
 - `metric_name` is not `snake_case`, or does not match a documented canonical metric name (`metrics/*.yaml`) or a valid app-specific metric name (`conventions.md`)
 - `value` is missing, not a number, or negative
+- `value` differs from a canonical metric's `fixed_value`, when its definition declares one
 - `unit` is missing or not one of the allowed values (`schema/common-types.yaml#/$defs/metric_unit`)
 - `unit` is `currency` and `currency` is absent, or `unit` is not `currency` and `currency` is present
 - `source` is missing or not one of the allowed values (`schema/common-types.yaml#/$defs/metric_source`)
