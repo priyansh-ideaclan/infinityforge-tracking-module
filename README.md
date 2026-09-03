@@ -77,13 +77,23 @@ See [`docs/implementation-guide.md`](docs/implementation-guide.md) for the full 
 
 ## 7. Current supported platforms
 
-As of this writing, the following app templates exist or are planned within InfinityForge:
+As of this writing, the following app templates each carry an independent adapter
+implementing this contract, in the App Factory template repository listed (each
+validated by its own dedicated test/consumer app — see
+`docs/repo-architecture-decision.md`):
 
-- **React Native app template** — currently the active implementation target for this contract
-- **Native Swift/iOS app template** — already exists
-- **Kotlin/Android app template** — may be added
+- **React Native** — `app-factory-rn` (`src/modules/analytics/`), validated by
+  `infinityforge-tracking-test-rn`
+- **Native Swift/iOS** — `Swift-Project-Foundation` (`Core/InfinityForgeTracking/`),
+  validated by `infinityforge-tracking-test-swift`
+- **Kotlin/Android** — `native-android-app-factory` (`core/core-tracking/`),
+  validated by `infinityforge-tracking-test-android`
 
-This repository does not implement any of them. It only defines what each must conform to.
+This repository does not implement any of them and never vendors their code — it only
+defines what each must conform to. See
+`docs/cross-platform-tracking-implementation-report.md` for the current, honestly
+qualified status of each (what's built vs. what's been compiled/tested vs. what's been
+verified against a real Firebase project).
 
 ## 8. Future platform model
 
@@ -156,11 +166,17 @@ infinityforge-tracking-module/
 │   └── metrics/               # One full example payload per canonical metric
 │
 ├── docs/
-│   └── implementation-guide.md
+│   ├── implementation-guide.md
+│   ├── reference-app-analysis.md
+│   ├── repo-architecture-decision.md
+│   └── cross-platform-tracking-implementation-report.md
 │
 └── validation/              # Lightweight, dependency-light consistency checks
     ├── validate.py
-    └── README.md
+    ├── README.md
+    └── runtime/              # Language-neutral runtime malformed-payload rules
+        ├── malformed-payload-rules.md
+        └── malformed-payload-rules.json
 ```
 
 ## Start here

@@ -33,6 +33,20 @@ python3 validation/validate.py
 
 Exit code is `0` when everything passes, non-zero otherwise.
 
+## Runtime validation rules (validation/runtime/)
+
+`validate.py` above validates this repository's own authoring-time files. It does not
+describe what a platform adapter's SDK must check on values it receives from an
+application at call time (`track`, `screen`, `identify`, `setUserProperties`,
+`recordMetric`) — that is a distinct, language-neutral rule set derived from the same
+specification files, kept in
+[`validation/runtime/malformed-payload-rules.md`](runtime/malformed-payload-rules.md)
+(prose, organized by rule) and
+[`validation/runtime/malformed-payload-rules.json`](runtime/malformed-payload-rules.json)
+(the same rules with stable ids, for an adapter's validator or test suite to reference
+directly). Every rule there is a restatement of an existing rule in `specification/` or
+`schema/` — see that document's own header for how the two relate.
+
 ## What it deliberately does not do
 
 It does not validate against `schema/event-envelope.yaml` or `schema/event-properties.yaml` as formal JSON Schema documents (that would require a JSON Schema engine and a `$ref` resolver, which this Phase 1 repository intentionally leaves for later). It re-implements the same rules directly in Python instead, which is enough to catch the mistakes that actually tend to happen when hand-editing these files.

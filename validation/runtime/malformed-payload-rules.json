@@ -1,0 +1,383 @@
+{
+  "$schema_note": "Language-neutral runtime validation rules for InfinityForge Tracking adapters. Companion to malformed-payload-rules.md, which is authoritative for prose explanation; this file exists for adapters/tests to reference a rule by stable id. Every rule is derived from an existing file under specification/ or schema/ — see 'source' on each rule.",
+  "contract_version_at_authoring": "1.2.0",
+  "action_vocabulary": {
+    "reject_call": "The whole API call (identify/screen) is a no-op; nothing is recorded.",
+    "drop_event": "The entire event is not emitted.",
+    "drop_metric": "The entire metric is not emitted.",
+    "drop_field": "Only the offending property/dimension/field is removed; the rest of the event/metric is still emitted if it remains valid.",
+    "correct_field": "The offending value is deterministically corrected in place and the event/metric is still emitted.",
+    "not_malformed": "This is explicitly allowed by the contract; no correction, drop, or error occurs."
+  },
+  "rules": [
+    {
+      "id": "envelope.required_field_missing",
+      "section": "1.1",
+      "applies_to": "both",
+      "trigger": "A field required by schema/event-envelope.yaml or schema/metric-envelope.yaml is absent, null, or an empty string.",
+      "action": "drop_event_or_metric",
+      "diagnostic": "development_only",
+      "source": [
+        "schema/event-envelope.yaml",
+        "schema/metric-envelope.yaml",
+        "specification/errors.md"
+      ]
+    },
+    {
+      "id": "envelope.field_wrong_type",
+      "section": "1.2",
+      "applies_to": "both",
+      "trigger": "A present envelope field does not match its documented type/pattern in schema/common-types.yaml.",
+      "action": "drop_event_or_metric",
+      "diagnostic": "development_only",
+      "source": [
+        "schema/common-types.yaml",
+        "specification/errors.md"
+      ]
+    },
+    {
+      "id": "envelope.null_value_emitted",
+      "section": "1.3",
+      "applies_to": "both",
+      "trigger": "Any field, property, or dimension value is null.",
+      "action": "drop_field_or_omit",
+      "diagnostic": "development_only",
+      "source": [
+        "specification/conventions.md"
+      ]
+    },
+    {
+      "id": "event.required_property_missing",
+      "section": "2.1",
+      "applies_to": "event",
+      "trigger": "A canonical event's property marked required: true is absent.",
+      "action": "drop_event",
+      "diagnostic": "development_only",
+      "source": [
+        "specification/errors.md",
+        "schema/event-properties.yaml"
+      ]
+    },
+    {
+      "id": "event.property_wrong_type",
+      "section": "2.2",
+      "applies_to": "event",
+      "trigger": "A canonical property's supplied value does not match its declared type. A stringified boolean (\"true\"/\"false\") or 0/1 in place of a boolean is a type mismatch.",
+      "action": "correct_field_if_unambiguous_else_drop_field",
+      "diagnostic": "development_only",
+      "source": [
+        "specification/errors.md",
+        "specification/conventions.md"
+      ]
+    },
+    {
+      "id": "event.enum_value_not_allowed",
+      "section": "2.3",
+      "applies_to": "event",
+      "trigger": "A canonical enum-typed property's value is not among its documented allowed_values.",
+      "action": "drop_field_or_drop_event_if_required",
+      "diagnostic": "development_only",
+      "note": "Governs emission only. Consuming systems must treat an unrecognized enum value permissively — that is a separate, non-runtime-validation rule.",
+      "source": [
+        "specification/errors.md",
+        "specification/conventions.md"
+      ]
+    },
+    {
+      "id": "event.price_currency_unpaired",
+      "section": "2.4",
+      "applies_to": "event",
+      "trigger": "An event with a paired price/currency property pair (currently subscription_started, purchase_completed) has exactly one of the pair present.",
+      "action": "drop_field",
+      "diagnostic": "development_only",
+      "source": [
+        "specification/conventions.md",
+        "events/monetization.yaml"
+      ]
+    },
+    {
+      "id": "event.reserved_property_key",
+      "section": "2.5",
+      "applies_to": "event",
+      "trigger": "A property key equals a reserved envelope field name (event, schema_version, timestamp, app_id, environment, platform, sdk_version, sdk_name, app_version, user_id, anonymous_id, properties).",
+      "action": "drop_field",
+      "diagnostic": "development_only",
+      "source": [
+        "specification/conventions.md"
+      ]
+    },
+    {
+      "id": "event.non_snake_case_identifier",
+      "section": "2.6",
+      "applies_to": "event",
+      "trigger": "The event name or a property key does not match ^[a-z][a-z0-9_]*[a-z0-9]$ (min length 2).",
+      "action": "drop_event_or_drop_field",
+      "diagnostic": "development_only",
+      "source": [
+        "specification/errors.md",
+        "specification/conventions.md",
+        "schema/common-types.yaml"
+      ]
+    },
+    {
+      "id": "event.unknown_event_name",
+      "section": "2.7",
+      "applies_to": "event",
+      "trigger": "The event name does not match any entry in events/*.yaml.",
+      "action": "not_malformed",
+      "diagnostic": "development_only",
+      "note": "App-specific events are explicitly permitted. Still subject to every other rule in this file.",
+      "source": [
+        "specification/errors.md"
+      ]
+    },
+    {
+      "id": "event.screen_name_missing",
+      "section": "2.8",
+      "applies_to": "event",
+      "trigger": "screen() is called with an empty or missing screen name.",
+      "action": "reject_call",
+      "diagnostic": "development_only",
+      "source": [
+        "specification/screen-tracking.md",
+        "events/application.yaml"
+      ]
+    },
+    {
+      "id": "metric.required_dimension_missing",
+      "section": "3.1",
+      "applies_to": "metric",
+      "trigger": "A canonical metric's dimension marked required: true is absent.",
+      "action": "drop_metric",
+      "diagnostic": "development_only",
+      "source": [
+        "specification/errors.md",
+        "schema/metric-dimensions.yaml"
+      ]
+    },
+    {
+      "id": "metric.value_missing_or_negative",
+      "section": "3.2",
+      "applies_to": "metric",
+      "trigger": "value is absent, not a number, or negative.",
+      "action": "drop_metric",
+      "diagnostic": "development_only",
+      "note": "Never coerce a negative value to its absolute value — drop instead, since that would silently change meaning.",
+      "source": [
+        "specification/errors.md",
+        "schema/common-types.yaml"
+      ]
+    },
+    {
+      "id": "metric.unit_missing_or_invalid",
+      "section": "3.3",
+      "applies_to": "metric",
+      "trigger": "unit is absent or not one of currency|count|impression|millisecond|second|other.",
+      "action": "drop_metric",
+      "diagnostic": "development_only",
+      "source": [
+        "specification/errors.md",
+        "schema/common-types.yaml"
+      ]
+    },
+    {
+      "id": "metric.currency_pairing_violated",
+      "section": "3.4",
+      "applies_to": "metric",
+      "trigger": "unit is currency and currency is absent, OR unit is not currency and currency is present.",
+      "action": "drop_metric_if_currency_missing_else_drop_field",
+      "diagnostic": "development_only",
+      "source": [
+        "specification/errors.md",
+        "specification/metric-envelope.md",
+        "schema/metric-envelope.yaml"
+      ]
+    },
+    {
+      "id": "metric.dimension_wrong_type_or_enum",
+      "section": "3.5",
+      "applies_to": "metric",
+      "trigger": "A canonical dimension's value does not match its declared type (string|integer|boolean|enum), or an enum dimension's value is not among allowed_values.",
+      "action": "correct_field_if_unambiguous_else_drop_field_or_metric",
+      "diagnostic": "development_only",
+      "source": [
+        "specification/errors.md",
+        "schema/metric-dimensions.yaml"
+      ]
+    },
+    {
+      "id": "metric.reserved_or_non_snake_case_dimension_key",
+      "section": "3.6",
+      "applies_to": "metric",
+      "trigger": "A dimension key collides with a reserved metric-envelope field name, or is not snake_case.",
+      "action": "drop_field",
+      "diagnostic": "development_only",
+      "source": [
+        "specification/errors.md",
+        "specification/metric-envelope.md"
+      ]
+    },
+    {
+      "id": "metric.source_missing_or_invalid",
+      "section": "3.7",
+      "applies_to": "metric",
+      "trigger": "source is absent or not one of application|billing_system|advertising_system|operating_system|network|provider|other.",
+      "action": "drop_metric",
+      "diagnostic": "development_only",
+      "source": [
+        "specification/errors.md",
+        "schema/common-types.yaml"
+      ]
+    },
+    {
+      "id": "metric.fixed_value_mismatch",
+      "section": "3.8",
+      "applies_to": "metric",
+      "trigger": "A canonical metric with a declared fixed_value (currently ad_impression, handled_error; both fixed at 1) is recorded with a different value.",
+      "action": "correct_field",
+      "diagnostic": "development_only",
+      "note": "This is the one rule in this document where correction is chosen over dropping. errors.md/metrics.md's \"correct what can be unambiguously corrected, or drop... or queue... in that order of preference\" leaves room for either choice per rule; a fixed_value declaration makes the correct value genuinely unambiguous (exactly one possible right answer), unlike e.g. event.non_snake_case_identifier's case transliteration, which is a guess about intent and so drops instead.",
+      "source": [
+        "metrics/advertising.yaml",
+        "metrics/reliability.yaml",
+        "validation/validate.py"
+      ]
+    },
+    {
+      "id": "metric.schema_version_invalid",
+      "section": "3.9",
+      "applies_to": "metric",
+      "trigger": "schema_version is absent or not a positive integer.",
+      "action": "drop_metric",
+      "diagnostic": "development_only",
+      "source": [
+        "specification/errors.md"
+      ]
+    },
+    {
+      "id": "metric.unknown_metric_name",
+      "section": "3.10",
+      "applies_to": "metric",
+      "trigger": "metric_name does not match any entry in metrics/*.yaml.",
+      "action": "not_malformed",
+      "diagnostic": "development_only",
+      "note": "App-specific metrics are explicitly permitted. Still subject to every other rule in this file.",
+      "source": [
+        "specification/errors.md"
+      ]
+    },
+    {
+      "id": "identity.identify_empty_user_id",
+      "section": "4.1",
+      "applies_to": "identity",
+      "trigger": "identify() is called with an empty string or no argument.",
+      "action": "reject_call",
+      "diagnostic": "development_only",
+      "source": [
+        "specification/identity.md"
+      ]
+    },
+    {
+      "id": "identity.identify_without_reset",
+      "section": "4.2",
+      "applies_to": "identity",
+      "trigger": "identify(new_user_id) is called with a different user_id than the one already active, without an intervening reset().",
+      "action": "adapter_defined_defensive_behavior",
+      "diagnostic": "development_only",
+      "note": "Contract explicitly leaves the specific defensive behavior undefined; must never crash. Correctness burden is on the calling application to sequence reset() then identify().",
+      "source": [
+        "specification/identity.md"
+      ]
+    },
+    {
+      "id": "identity.reset_must_generate_new_anonymous_id",
+      "section": "4.3",
+      "applies_to": "identity",
+      "trigger": "N/A — structural invariant of reset(), not an input-validation check.",
+      "action": "n/a_conformance_invariant",
+      "diagnostic": "n/a",
+      "source": [
+        "specification/identity.md",
+        "specification/privacy.md"
+      ]
+    },
+    {
+      "id": "privacy.reference_id_error_code_opacity",
+      "section": "5.1",
+      "applies_to": "metric",
+      "trigger": "Not mechanically detectable. Documentation-level constraint: reference_id must be an opaque correlation handle; handled_error's error_code must be a stable category/code, never a raw exception message.",
+      "action": "documentation_only_no_mechanical_check",
+      "diagnostic": "n/a",
+      "source": [
+        "specification/privacy.md"
+      ]
+    },
+    {
+      "id": "privacy.dimension_cardinality_type_restriction",
+      "section": "5.2",
+      "applies_to": "metric",
+      "trigger": "Mechanically enforced via metric.dimension_wrong_type_or_enum (3.5) — dimension types are restricted to string|integer|boolean|enum, never object/array.",
+      "action": "see_metric.dimension_wrong_type_or_enum",
+      "diagnostic": "n/a",
+      "source": [
+        "specification/privacy.md",
+        "schema/metric-dimensions.yaml"
+      ]
+    },
+    {
+      "id": "reliability.never_crash",
+      "section": "R1",
+      "applies_to": "both",
+      "trigger": "N/A — governs enforcement of every rule above.",
+      "action": "n/a_enforcement_requirement",
+      "diagnostic": "n/a",
+      "source": [
+        "specification/errors.md"
+      ]
+    },
+    {
+      "id": "reliability.never_block",
+      "section": "R2",
+      "applies_to": "both",
+      "trigger": "N/A — governs enforcement of every rule above.",
+      "action": "n/a_enforcement_requirement",
+      "diagnostic": "n/a",
+      "source": [
+        "specification/errors.md"
+      ]
+    },
+    {
+      "id": "reliability.order_of_preference",
+      "section": "R3",
+      "applies_to": "both",
+      "trigger": "N/A — governs enforcement of every rule above.",
+      "action": "correct_then_drop_then_queue",
+      "diagnostic": "n/a",
+      "source": [
+        "specification/errors.md"
+      ]
+    },
+    {
+      "id": "reliability.provider_isolation_out_of_scope",
+      "section": "R4",
+      "applies_to": "both",
+      "trigger": "N/A — clarifies that provider-transport failures are a distinct concern from these payload-validation rules.",
+      "action": "n/a_scope_note",
+      "diagnostic": "n/a",
+      "source": [
+        "specification/errors.md"
+      ]
+    },
+    {
+      "id": "reliability.dev_diagnostics_prod_silence",
+      "section": "R5",
+      "applies_to": "both",
+      "trigger": "N/A — governs the diagnostic field on every rule above.",
+      "action": "n/a_enforcement_requirement",
+      "diagnostic": "development_verbose_production_generic",
+      "source": [
+        "specification/errors.md"
+      ]
+    }
+  ]
+}

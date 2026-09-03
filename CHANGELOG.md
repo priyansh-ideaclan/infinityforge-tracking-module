@@ -6,6 +6,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Ver
 
 ## [Unreleased]
 
+### Added
+
+- `validation/runtime/malformed-payload-rules.md` and `.json`: a language-neutral
+  statement of what a conforming platform adapter must check at runtime on every
+  `track`/`screen`/`identify`/`setUserProperties`/`recordMetric` call, and what it must
+  do when a check fails. Derived entirely from existing rules already stated in
+  `specification/errors.md`, `specification/conventions.md`, `specification/privacy.md`,
+  `specification/identity.md`, and `schema/*.yaml` — no new contract rule was
+  introduced. Written to give a new platform adapter (or a reviewer comparing two
+  existing adapters) one place to check runtime validation behavior against, instead
+  of re-deriving it from prose scattered across those files.
+
 ### Fixed
 
 - Encoded `handled_error`'s existing `value == 1` rule as `fixed_value: 1`, so machine-readable contract consumers and validation enforce the same semantics already required by the normative prose.
